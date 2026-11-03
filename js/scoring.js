@@ -1,16 +1,18 @@
 (function(root){
-  function score(data,answers){
-    if(!Array.isArray(answers)||answers.length!==data.questions.length)throw new Error('请完成全部题目');
-    const picks=answers.map((a,i)=>{if(!Number.isInteger(a)||!data.questions[i].options[a])throw new Error('存在无效答案');return data.questions[i].options[a]});
-    const factionScore=picks.reduce((sum,o)=>sum+o.faction,0);
-    // Ties use the last unequal piece of faction evidence, never random assignment.
-    const faction=factionScore>0?'slayer':factionScore<0?'demon':picks[picks.length-1].faction>0?'slayer':'demon';
-    const traits=data.dimensions.map((_,i)=>picks.filter(o=>o.trait===i).length);
-    const max=Math.max(...traits);
-    const trait=[...picks].reverse().find(o=>traits[o.trait]===max).trait;
-    const profile=data.profiles.find(p=>p.faction===faction&&p.trait===trait);
-    const evidence=picks.map((o,i)=>({question:data.questions[i].title,answer:o.text,trait:o.trait,index:i})).filter(o=>o.trait===trait).slice(-2);
-    return {faction,factionScore,traits,trait,profile,evidence,close:Math.abs(factionScore)<=3};
-  }
-  if(typeof module!=='undefined')module.exports={score};else root.FateScore={score};
-})(typeof globalThis!=='undefined'?globalThis:this);
+ 'use strict';
+ function score(data,answers){
+  if(!Array.isArray(answers)||answers.length!==data.questions.length)throw Error('请完成全部题目');
+  const picks=data.questions.map((q,i)=>{const a=answers[i];if(!Number.isInteger(a)||a<0||a>=q.options.length)throw Error('存在无效答案');return q.options[a]});
+  // Normalize against each character's own theoretical score range across all questions.
+  // Scores are editorial support, never probabilities or population percentiles.
+  const ranking=data.characters.map(character=>{const id=character.id;let raw=0,min=0,max=0;
+   data.questions.forEach((q,i)=>{const values=q.options.map(o=>o.support[id]||0);min+=Math.min(...values);max+=Math.max(...values);raw+=picks[i].support[id]||0});
+   if(max===min)throw Error('角色缺少区分证据：'+id);
+   return {character,raw,min,max,value:(raw-min)/(max-min)};
+  }).sort((a,b)=>b.value-a.value||a.character.id.localeCompare(b.character.id,'en'));
+  const best=ranking[0],runner=ranking[1],gap=best.value-runner.value;
+  const evidence=data.questions.map((q,i)=>({question:q.title,questionId:q.id,answer:picks[i].text,reason:picks[i].reason,points:picks[i].support[best.character.id]||0,index:i})).filter(e=>e.points>0).sort((a,b)=>b.points-a.points||a.index-b.index).slice(0,3);
+  return {profile:best.character,runner:runner.character,ranking,evidence,close:gap<0.04,tied:Math.abs(gap)<1e-12,gap};
+ }
+ if(typeof module!=='undefined')module.exports={score};else root.FateScore={score};
+})(globalThis);

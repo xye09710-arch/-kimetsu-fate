@@ -1,4 +1,12 @@
 {
-  "name": "kimetsu-fate", "version": "0.1.0", "private": true,
-  "scripts": {"start": "node scripts/serve.cjs", "test": "node tests/scoring.cjs", "test:browser": "node tests/browser.cjs", "build": "node scripts/build.cjs"}
+  "name": "kimetsu-fate",
+  "version": "0.2.0",
+  "private": true,
+  "scripts": {
+    "start": "node scripts/serve.cjs",
+    "test": "node tests/scoring.cjs",
+    "test:browser": "node tests/browser.cjs",
+    "build": "node scripts/build.cjs",
+    "review:content": "node scripts/export-review.cjs"
+  }
 }

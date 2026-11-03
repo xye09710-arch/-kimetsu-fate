@@ -1,11 +1,20 @@
-const assert=require('node:assert/strict'),D=require('../js/data.js'),{score}=require('../js/scoring.js');
-assert.equal(D.questions.length,12);assert.equal(new Set(D.questions.map(q=>q.id)).size,12);assert.equal(D.profiles.length,8);
-for(const q of D.questions){assert.equal(q.options.length,4);for(const o of q.options){assert.ok([-2,-1,1,2].includes(o.faction));assert.ok(o.trait>=0&&o.trait<4)}}
-assert.throws(()=>score(D,[]));for(const bad of [-1,4,null,NaN,'0'])assert.throws(()=>score(D,Array(12).fill(bad)));
-assert.equal(score(D,Array(12).fill(0)).profile.id,'slayer-0');assert.equal(score(D,Array(12).fill(1)).profile.id,'slayer-1');assert.equal(score(D,Array(12).fill(2)).profile.id,'demon-2');assert.equal(score(D,Array(12).fill(3)).profile.id,'demon-3');
-// Exact faction tie with last choice positive and negative.
-let ties=0;const reachable=new Map(),distribution={slayer:0,demon:0};let seed=20261101;
-for(let n=0;n<60000;n++){const a=Array.from({length:12},()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed>>>30});const r=score(D,a);assert.deepEqual(score(D,a),r);assert.equal(r.traits.reduce((x,y)=>x+y),12);assert.ok(r.profile);distribution[r.faction]++;if(!reachable.has(r.profile.id))reachable.set(r.profile.id,a);if(r.factionScore===0){ties++;assert.equal(r.faction,D.questions[11].options[a[11]].faction>0?'slayer':'demon')}assert.ok(r.evidence.length>=1);assert.ok(r.evidence.every(e=>e.trait===r.trait));const m=Math.max(...r.traits);const expected=[...a].reverse().map((a,j)=>D.questions[11-j].options[a]).find(o=>r.traits[o.trait]===m).trait;assert.equal(r.trait,expected)}
-assert.equal(reachable.size,8);assert.ok(ties>0);for(const p of D.profiles){assert.equal(p.story.length,3);assert.ok(p.story.join('').length>200)}
-require('node:fs').mkdirSync('test-results',{recursive:true});require('node:fs').writeFileSync('test-results/fixtures.json',JSON.stringify(Object.fromEntries(reachable),null,2));
-console.log(JSON.stringify({status:'passed',sampledPaths:60000,reachableProfiles:reachable.size,factionTies:ties,distribution},null,2));
+const assert=require('node:assert/strict'),fs=require('node:fs'),D=require('../js/data.js'),{score}=require('../js/scoring.js');
+assert.equal(D.questions.length,12);assert.equal(D.characters.length,12);assert.equal(new Set(D.characters.map(c=>c.id)).size,12);
+const ids=new Set(D.characters.map(c=>c.id));
+for(const q of D.questions){assert.equal(q.options.length,4);for(const o of q.options){assert.ok(o.reason);assert.equal(Object.keys(o.support).length,3);for(const [id,n]of Object.entries(o.support)){assert.ok(ids.has(id));assert.ok(n>=1&&n<=3)}}}
+assert.throws(()=>score(D,[]));for(const bad of [-1,4,null,NaN,'0',undefined])assert.throws(()=>score(D,Array(12).fill(bad)));
+assert.throws(()=>score(D,new Array(12)));assert.throws(()=>score(D,{}));
+const counts=Object.fromEntries(D.characters.map(c=>[c.id,0])),fixtures={},coverage={};let seed=20261103,ties=0,close=0;
+for(let n=0;n<60000;n++){
+ const a=Array.from({length:12},()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed>>>30}),r=score(D,a);counts[r.profile.id]++;fixtures[r.profile.id]??=a;ties+=r.tied?1:0;close+=r.close?1:0;
+ assert.ok(r.evidence.length>0);assert.ok(r.ranking.every(x=>x.value>=0&&x.value<=1));
+ for(const e of r.evidence){const q=D.questions[e.index],o=q.options[a[e.index]];assert.equal(e.question,q.title);assert.equal(e.answer,o.text);assert.ok(o.support[r.profile.id]>0)}
+ if(n<100){assert.deepEqual(score(D,a),r);assert.deepEqual(score({...D,characters:[...D.characters].reverse()},a),r);const b=[...a];b[0]=(b[0]+1)%4;score(D,b);assert.deepEqual(score(D,a),r)}
+}
+for(const c of D.characters){assert.ok(fixtures[c.id],'Unreachable character '+c.id);const maxima=D.questions.map(q=>q.options.reduce((best,o,i)=>((o.support[c.id]||0)>(q.options[best].support[c.id]||0)?i:best),0));const r=score(D,maxima);assert.ok(r.ranking.find(x=>x.character.id===c.id).value===1);coverage[c.id]={maxSupportPath:maxima,result:r.profile.id};assert.ok(c.canon&&c.similarity&&c.difference&&c.reflection)}
+// Independent hand-calculated fixture: accumulate normalized evidence without invoking score.
+const answers=[0,1,2,3,0,1,2,3,0,1,2,3];const expected=D.characters.map(c=>{let min=0,max=0,sum=0;D.questions.forEach((q,i)=>{const v=q.options.map(o=>o.support[c.id]||0);min+=Math.min(...v);max+=Math.max(...v);sum+=v[answers[i]]});return {id:c.id,value:(sum-min)/(max-min)}}).sort((a,b)=>b.value-a.value||a.id.localeCompare(b.id,'en'));
+assert.equal(score(D,answers).profile.id,expected[0].id);
+// Controlled tie: do not let source array order or the final answer secretly decide it.
+const fake={characters:[{id:'b'},{id:'a'}],questions:[{id:'q',title:'q',options:[{text:'yes',reason:'same',support:{a:1,b:1}},{text:'no',reason:'none',support:{}}]}]};assert.ok(score(fake,[0]).tied);assert.ok(score(fake,[0]).close);assert.equal(score(fake,[0]).profile.id,'a');
+fs.mkdirSync('test-results',{recursive:true});fs.writeFileSync('test-results/fixtures.json',JSON.stringify(fixtures,null,2));fs.writeFileSync('test-results/scoring-report.json',JSON.stringify({status:'passed',sampledPaths:60000,counts,ties,close,coverage},null,2));console.log(JSON.stringify({status:'passed',sampledPaths:60000,counts,ties,close},null,2));
