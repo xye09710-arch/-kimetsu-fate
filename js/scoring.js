@@ -12,7 +12,11 @@
   }).sort((a,b)=>b.value-a.value||a.character.id.localeCompare(b.character.id,'en'));
   const best=ranking[0],runner=ranking[1],gap=best.value-runner.value;
   const evidence=data.questions.map((q,i)=>({question:q.title,questionId:q.id,answer:picks[i].text,reason:picks[i].reason,points:picks[i].support[best.character.id]||0,index:i})).filter(e=>e.points>0).sort((a,b)=>b.points-a.points||a.index-b.index).slice(0,3);
-  return {profile:best.character,runner:runner.character,ranking,evidence,close:gap<0.04,tied:Math.abs(gap)<1e-12,gap};
+  const abilities=(data.dimensions||[]).map((name,d)=>{
+   const normalized=data.questions.map((q,i)=>{const v=q.options.map(o=>o.ability[d]),lo=Math.min(...v),hi=Math.max(...v);return hi===lo?null:(picks[i].ability[d]-lo)/(hi-lo)}).filter(v=>v!==null);
+   return {name,value:normalized.length?Math.round(30+60*normalized.reduce((a,b)=>a+b,0)/normalized.length):60};
+  });
+  return {profile:best.character,runner:runner.character,ranking,evidence,abilities,close:gap<0.04,tied:Math.abs(gap)<1e-12,gap};
  }
  // One unbiased integer roll per completed quiz. UI rerenders/exports reuse the result.
  function roll(cryptoSource=globalThis.crypto,oneIn=1000){
