@@ -1,58 +1,64 @@
-# 鬼灭命运录 · 角色匹配原型 v0.4
+# 鬼灭命运录 · v0.5
 
-平行人生实验室的独立静态测评。16道已确认的鬼灭主题情境题 → 具体角色匹配 → 六维能力图 → 鬼灭侧写 → PNG角色卡。
+平行人生实验室的非官方静态同人作品：16 道情境题 → 角色揭晓 → 六维动态解读 → 人物相似处与内在矛盾 → 原创鬼灭世界情境 → 留言 → 900×1600 PNG 卡。
 
-16位常规角色：炭治郎、祢豆子、善逸、伊之助、义勇、胡蝶忍、炼狱杏寿郎、宇髓天元、蜜璃、无一郎、小芭内、实弥、无惨、猗窝座、童磨、黑死牟。另有隐藏角色继国缘一。祢豆子不归为反派。
+16 位常规角色与隐藏继国缘一共 17 张独立肖像、17 套专属主题。v0.5 保留 v0.4.1 的题目、64 选项支持映射、评分与六维数值算法、0.1% 独立彩蛋。无账号、支付墙、外部模型 API 或答案上传；刷新与重测清空答案。
 
-角色归原作权利方所有；情境、结果解读与场景插画为原创。非官方同人产品，与原作权利方无关联或授权。无官方立绘、截图、台词、音乐或标识。评分属于娱乐性叙事联想，不是心理诊断或经验证的性格模型。
+角色归原作权利方所有；文本与肖像为原创同人表达，无官方授权。人物解读包含设定剧透；命运情境不是原作剧情或台词。结果只作娱乐叙事参考，不是心理测量或道德评判。
 
-## 本地运行
+## Windows 本地运行
 
-Node.js 18+，无站点运行依赖：
+安装 Node.js 22 LTS 与 Git。PowerShell 中首次获取：
 
-```sh
+```powershell
+git clone --branch feat/fate-prototype https://github.com/xye09710-arch/-kimetsu-fate.git
+Set-Location .\-kimetsu-fate
 npm start
-# http://127.0.0.1:8787
+```
+
+浏览器打开 `http://127.0.0.1:8787`，保持终端运行，Ctrl+C 停止。站点没有 npm 运行依赖，无需先执行 npm install。
+
+已有仓库时，在仓库目录更新：
+
+```powershell
+git fetch origin
+git switch feat/fate-prototype
+git pull --ff-only origin feat/fate-prototype
+npm start
+```
+
+若工作区有自己的修改，请先保存后切换或更新。`main` 尚未包含这个原型。
+
+## 测试与构建
+
+```powershell
 npm test
 npm run build
 ```
 
-浏览器回归：先运行 npm test 生成16常规角色样本，再运行 npm run test:browser。需开发环境已安装Playwright与Chrome；支持CHROMIUM_PATH、TEST_BASE_URL。测试工具不是站点运行依赖。
+评分测试生成 `test-results/fixtures.json`；报告测试检查全部角色的文本长度、分数区间变化与主题文字对比度。静态产物在 `dist`。
 
-## 文件
+可选浏览器开发工具（不影响站点运行）：
 
-- js/data.js：确认题目、64选项支持映射、12角色原创解读。
-- js/scoring.js：逐角色归一化支持度；并列与接近标记，无阵营门槛。
-- js/app.js：答题、结果解释、来源链接、PNG预览与下载。
-- assets/wisteria-night.png：原创场景，不是角色肖像。
-- docs/QUESTIONS.md：生成的题目审阅稿。
-- docs/SCORING.md：生成的全量支持映射，含逐项解释与角色范围。
-- docs/PRODUCT.md、docs/TESTING.md：当前产品说明与验证局限。
-- scripts/export-review.cjs：生成题目和评分文档，防止文档与执行数据脱节。
+```powershell
+npm install --no-save --package-lock=false playwright
+# 另一个终端保持 npm start 运行
+$env:CHROMIUM_PATH = 'C:/Program Files/Google/Chrome/Application/chrome.exe'
+npm run test:browser
+```
+
+Chrome 路径不同则修改该变量；也可以 `npx playwright install chromium` 并将 CHROMIUM_PATH 指向安装的浏览器。浏览器检查四种宽度、全部 17 位角色、PNG 实际下载与肖像失败回退。截图与报告写入忽略的 `test-results`。详见 [验证说明](docs/TESTING.md)。
+
+## 文件与内容
+
+- `js/data.js`、`js/scoring.js`：原题、支持映射与评分；本次未改动。
+- `js/report.js`：17 位角色长篇解读、六维三档文案和主题；纯静态、确定性组合。
+- `js/app.js`、`js/radar.js`、`css/style.css`：报告、主题图表、短文 PNG 与手机排版。
+- `assets/portraits`：保留全部原始肖像；首页仍使用 `assets/wisteria-night.png`。
+- [产品与内容来源](docs/PRODUCT.md)、[肖像来源](docs/PORTRAITS.md)、[测试说明](docs/TESTING.md)。
 
 ## Netlify
 
-连接本仓库的 feat/fate-prototype 分支；main尚未合并，不能用来发布当前网页。
+连接 `feat/fate-prototype`，Build command 为 `npm run build`，Publish directory 为 `dist`，Node.js 22，Base directory 留空；`netlify.toml` 已提供默认设置。构建复制 25 个运行文件，包含报告模块与 17 张肖像，不发布测试和开发文档。无环境变量或密钥需求。推送可能触发已有部署，本次未验证公网部署状态。
 
-|设置|值|
-|---|---|
-|Base directory|留空|
-|Build command|npm run build|
-|Publish directory|dist|
-|Node.js|22|
-
-netlify.toml提供相同默认值。构建只复制6个运行文件到dist，不发布docs、tests或原始开发目录。无环境变量、密钥、账户、服务器函数、埋点或答案上传。首次绑定仍需Netlify所有者操作；本次未获取托管站点状态，不能确认公网已更新。若该分支已绑定，推送可能触发其自动部署。
-
-答案仅存页面内存，刷新/重测清空。导出图片在浏览器本地生成。真机保存行为仍待iOS、Android和内置浏览器验收。
-
-## 隐藏彩蛋
-
-每次完成答题独立触发率0.1%（1/1000），不加收费用；不会随导出重抽。隐藏页及图片保留常规匹配。彩蛋不是稀有人格认证；常规匹配仍按答案计算。首页只露出问号，但静态源码不能保密或防篡改。外部收款发链接，网页无支付与付费墙。
-
-## v0.4 结果页
-
-移除答案引用、角色匹配依据、解释性旁白与算法入口。新增4题，原12题不变；六维为行动力、洞察力、应变力、意志力、共情力、守护力。js/radar.js提供共享SVG/PNG几何。角色卡升级为900×1600，带本次六维能力。构建仅复制7个运行文件。
-
-## 角色正面战斗图
-
-首页继续使用紫藤夜行。结果页和900×1600角色卡按角色ID加载assets/portraits中的17张原创同人肖像；手机端完整展示人像。各角色采用独立色调、招式与场景背景，不使用统一紫藤背景板。炭治郎为暖红金色静态正脸，其余优先采用战斗瞬间；具体提示词与例外见docs/PORTRAITS.md。每次结果只加载当前角色，不预加载整套图片。
+隐藏缘一每次完成答题独立触发 0.1%，不是稀有人格或能力认证，导出不会重抽。静态源码公开，不提供防篡改或访问鉴权。iOS、Android 与内置浏览器长按保存仍需真机验收。

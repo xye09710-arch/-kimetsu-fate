@@ -10,3 +10,32 @@
 
 .result-head .result-portrait{display:block;width:100%;height:auto;aspect-ratio:7/8;object-fit:contain;object-position:center;border-radius:4px;border:1px solid #edb77d44}.portrait-error{color:var(--gold);font-size:13px}@media(min-width:651px){.result-head{grid-template-columns:minmax(0,1fr)240px}}@media(max-width:650px){.result-head .result-portrait{display:block;grid-row:1;max-width:320px;margin:0 auto 18px}.result-head>div{grid-row:2}}
 .result-head .result-portrait[hidden]{display:none!important}
+
+/* v0.5: variables live on the result/dialog, leaving the wisteria home untouched. */
+.result{padding:28px;background:radial-gradient(ellipse at 100% 0,var(--panel),transparent 70%),var(--bg);border:1px solid var(--line);border-radius:6px;color:var(--text)}
+.result .result-head{background:linear-gradient(135deg,var(--panel),var(--bg));border-color:var(--line);padding:24px}
+.result h2,.result .section-title h3{color:var(--gold)}
+.result .result-portrait{border-color:var(--line)}
+.result .section>p{color:var(--text);font-size:16px;line-height:2.05;max-width:65ch;overflow-wrap:anywhere}
+.result .section>p+p{margin-top:1.2em}
+.result .section>.note{color:var(--muted);font-size:12px}
+.result .section-title{align-items:baseline;gap:12px}
+.result .section-title h3{font-size:clamp(20px,3vw,24px);letter-spacing:.03em}
+.ability-readings{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:24px}
+.ability-reading{min-width:0;border:1px solid var(--line);border-top:2px solid var(--green);padding:20px;background:var(--panel);border-radius:4px}
+.ability-reading h4{font-size:16px;color:var(--gold);margin:0 0 12px;font-weight:500}
+.ability-reading p{font-size:15px;line-height:2;color:var(--text);overflow-wrap:anywhere}
+.result .story-label{letter-spacing:.06em;margin-bottom:16px}
+.result .hidden-banner{background:linear-gradient(135deg,var(--panel),var(--bg));border-color:var(--gold)}
+.hidden-result .result-head:after{border-color:var(--line)}
+.result .btn,#card-dialog .btn{color:var(--bg)}
+.result .btn.secondary,#card-dialog .btn.secondary{color:var(--text)}
+@media(max-width:650px){
+ .result{padding:18px 14px;margin-left:-6px;margin-right:-6px}
+ .result .result-head{padding:16px;gap:8px}
+ .result .result-head h2{font-size:clamp(28px,8vw,36px)}
+ .result .section>p{font-size:16px;line-height:2.05}
+ .ability-readings{grid-template-columns:1fr;gap:14px}
+ .ability-reading{padding:18px}
+ .result .actions{flex-direction:column}
+}
