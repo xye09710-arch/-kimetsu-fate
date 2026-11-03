@@ -6,6 +6,7 @@
  function button(text,action,cls='btn'){const b=el('button',cls,text);b.type='button';b.onclick=action;return b}
  function view(cls){app.replaceChildren();const s=el('section',cls);app.append(s);window.scrollTo(0,0);app.focus({preventScroll:true});return s}
  function art(){const img=el('img');img.src='assets/wisteria-night.png';img.alt='原创紫藤花与雾林石阶，佩刀旅人背影，非官方角色画像';img.width=700;img.height=800;return img}
+ function characterPortrait(character){const img=el('img','result-portrait');img.src=character.portrait;img.alt=character.name+'战斗正面同人肖像';img.width=700;img.height=800;img.decoding='async';img.onerror=()=>{img.hidden=true;const message=el('p','portrait-error',character.name+'的肖像暂时加载失败，请刷新重试。');message.setAttribute('role','status');img.after(message)};return img}
  function home(){
   const s=view('home'),hero=el('div','hero'),copy=el('div');
   copy.append(el('p','eyebrow','鬼灭命运录 / 角色匹配篇'));
@@ -30,7 +31,7 @@
  function section(parent,n,title){const s=el('section','section'),h=el('div','section-title');h.append(el('span','',n),el('h3','',title));s.append(h);parent.append(s);return s}
  function report(){
   const s=view(result.hidden?'result hidden-result':'result'),p=result.profile;
-  const head=el('div','result-head'),copy=el('div');copy.append(el('span','pill',result.hidden?'隐藏彩蛋 · 偶然相逢':result.tied?'本次并列匹配':result.close?'本次接近的角色之一':'本次选择，更像'),el('h2','',p.name),el('p','verdict',p.verdict),el('p','result-number',`${p.affiliation} / 原创同人解读`));head.append(copy,art());s.append(head);
+  const head=el('div','result-head'),copy=el('div');copy.append(el('span','pill',result.hidden?'隐藏彩蛋 · 偶然相逢':result.tied?'本次并列匹配':result.close?'本次接近的角色之一':'本次选择，更像'),el('h2','',p.name),el('p','verdict',p.verdict),el('p','result-number',`${p.affiliation} / 原创同人解读`));head.append(copy,characterPortrait(p));s.append(head);
   if(!result.hidden&&result.close){const box=el('aside','near-match');box.append(el('strong','',result.tied?`你与${result.runner.name}的匹配也并列。`:`${result.runner.name}也与你很接近。`),el('p','note',result.tied?'你身上，也有另一位角色的影子。':`${result.runner.tag}`));s.append(box)}
   if(result.hidden){const banner=el('aside','hidden-banner');banner.append(el('p','eyebrow','HIDDEN ENCOUNTER'),el('h3','','你遇见了一位没有写在名单上的人。'),el('p','note','本次独立彩蛋触发率为 0.1%，不是答题匹配出的稀有人格。你的常规匹配仍然保留。'));s.append(banner)}
   const ability=section(s,'01','你的六维能力');const chart=el('div','ability-chart');chart.id='ability-chart';FateRadar.render(chart,result.abilities);ability.append(chart);
@@ -49,7 +50,7 @@
    cleanup();const p=result.profile,canvas=document.createElement('canvas');canvas.width=900;canvas.height=1600;const ctx=canvas.getContext('2d');if(!ctx)throw Error('canvas');
    ctx.fillStyle='#101c22';ctx.fillRect(0,0,900,1600);ctx.strokeStyle=result.hidden?'#edb77d':'#667167';ctx.strokeRect(34,34,832,1532);
    ctx.fillStyle='#a8b8b5';ctx.font='20px sans-serif';ctx.fillText('平行人生实验室  /  鬼灭命运录',70,95);
-   const image=new Image();image.src='assets/wisteria-night.png';await image.decode();ctx.drawImage(image,490,140,330,330*image.naturalHeight/image.naturalWidth);
+   const image=new Image();image.src=p.portrait;await image.decode();ctx.drawImage(image,490,140,330,330*image.naturalHeight/image.naturalWidth);
    ctx.fillStyle='#edb77d';ctx.font='23px sans-serif';ctx.fillText(result.hidden?'隐藏彩蛋 · 偶然相逢':result.tied?'本次并列匹配':result.close?'本次接近的角色之一':'我的选择，更像',70,195);
    ctx.fillStyle='#eee9d9';ctx.font='52px serif';wrap(ctx,p.name,70,280,395,64);
    ctx.fillStyle='#edb77d';ctx.font='28px serif';wrap(ctx,p.verdict,70,390,380,44);
