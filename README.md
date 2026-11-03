@@ -24,7 +24,7 @@ npm run build
 - js/data.js：确认题目、64选项支持映射、12角色原创解读。
 - js/scoring.js：逐角色归一化支持度；并列与接近标记，无阵营门槛。
 - js/app.js：答题、结果解释、来源链接、PNG预览与下载。
-- assets/night.svg：原创场景，不是角色肖像。
+- assets/wisteria-night.png：原创场景，不是角色肖像。
 - docs/QUESTIONS.md：生成的题目审阅稿。
 - docs/SCORING.md：生成的全量支持映射，含逐项解释与角色范围。
 - docs/PRODUCT.md、docs/TESTING.md：当前产品说明与验证局限。
