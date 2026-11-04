@@ -62,3 +62,7 @@ Chrome 路径不同则修改该变量；也可以 `npx playwright install chromi
 连接 `feat/fate-prototype`，Build command 为 `npm run build`，Publish directory 为 `dist`，Node.js 22，Base directory 留空；`netlify.toml` 已提供默认设置。构建复制 25 个运行文件，包含报告模块与 17 张肖像，不发布测试和开发文档。无环境变量或密钥需求。推送可能触发已有部署，本次未验证公网部署状态。
 
 隐藏缘一每次完成答题独立触发 0.1%，不是稀有人格或能力认证，导出不会重抽。静态源码公开，不提供防篡改或访问鉴权。iOS、Android 与内置浏览器长按保存仍需真机验收。
+
+## 文案润色稿
+
+已接入用户提供的《鬼灭命运录_v0.5_文案润色稿.txt》，更新首页、17 角色报告、六维区间解读与分享卡短文。题目、评分、肖像和隐藏机制保留；少量六维区间语句为满足 120 字上限而压缩，详见 [润色稿接入记录](docs/COPY_EDIT.md)。本地运行方式不变。

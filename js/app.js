@@ -11,12 +11,12 @@
   const s=view('home'),hero=el('div','hero'),copy=el('div');
   copy.append(el('p','eyebrow','鬼灭命运录 / 角色匹配篇'));
   const title=el('h1','','走进鬼灭，');title.append(el('span','','你最像谁？'));
-  copy.append(title,el('p','intro','遇见鬼、面对失去、为重要的人做一次决定。看看你的选择，更接近《鬼灭之刃》里的哪位角色。'));
-  const opening=el('details','opening');opening.append(el('summary','','这次，你只是小镇上的普通人'),el('p','',D.opening),el('p','',D.instructions));copy.append(opening,button('开始角色测评  ↗',question));
+  copy.append(title,el('p','intro','遇见鬼、面对失去、替重要的人做一次决定。十六个处境，看看你的选择更接近《鬼灭之刃》里的谁。'));
+  const opening=el('details','opening');opening.append(el('summary','','这回，你只是镇上的普通人'),el('p','',D.opening),el('p','',D.instructions));copy.append(opening,button('开始角色测评  ↗',question));
   const meta=el('div','home-meta');['16 道情境题','约 6—10 分钟','16 位角色 + 隐藏彩蛋'].forEach(t=>meta.append(el('span','',t)));copy.append(meta,el('p','micro','含鬼杀队、鬼与反派角色；结果文案涉及人物基本设定。'));
   const figure=el('figure','hero-art');figure.append(art(),el('figcaption','art-caption','十六次选择 · 你的鬼灭角色'));hero.append(copy,figure);s.append(hero);
   const preview=el('section','character-preview');preview.append(el('h3','','可能遇见的角色'),el('p','note','阵营不预设，相似之处也不等于你认同角色的全部行为。'));
-  const chips=el('div','character-chips');D.characters.filter(c=>c.id!==D.hidden.id).forEach(c=>chips.append(el('span','',c.name)));chips.append(el('span','hidden-chip','？ 隐藏角色'));preview.append(chips,el('p','note','完成答题后另有独立彩蛋机会：每次 0.1%。与答案匹配无关；不加收费用，不代表人格稀有度。'));s.append(preview);
+  const chips=el('div','character-chips');D.characters.filter(c=>c.id!==D.hidden.id).forEach(c=>chips.append(el('span','',c.name)));chips.append(el('span','hidden-chip','？ 隐藏角色'));preview.append(chips,el('p','note','答完题后，还有一次独立的彩蛋机会：0.1%。它和你的答案无关，不用额外付费，也不代表人格稀有度。'));s.append(preview);
  }
  function question(){
   const s=view('quiz'),q=D.questions[index],top=el('div','topline');top.append(el('span','','鬼灭命运录 · 角色匹配'),el('span','',`${String(index+1).padStart(2,'0')} / ${D.questions.length}`));
@@ -26,7 +26,7 @@
   const opts=el('div','options');opts.setAttribute('role','group');opts.setAttribute('aria-labelledby','question-title');
   const next=button(index===D.questions.length-1?'揭晓我的角色  ↗':'下一题  →',()=>{if(answers[index]===null)return;if(index===D.questions.length-1){try{result=FateScore.resolve(D,answers,FateScore.roll(globalThis.crypto,D.hidden.oneIn));report()}catch{let notice=document.getElementById('quiz-error');if(!notice){notice=el('p','status');notice.id='quiz-error';notice.setAttribute('role','status');s.append(notice)}notice.textContent='暂时无法生成结果，请稍后重试。'}}else{index++;question()}});next.id='next';next.disabled=answers[index]===null;
   q.options.forEach((o,i)=>{const b=button('',()=>{answers[index]=i;for(const [j,node]of [...opts.children].entries())node.setAttribute('aria-pressed',String(i===j));next.disabled=false},'option');b.setAttribute('aria-pressed',String(answers[index]===i));b.append(el('span','letter',o.id),el('span','',o.text));opts.append(b)});
-  const nav=el('div','actions'),back=button('← 上一题',()=>{index--;question()},'btn secondary');back.id='back';back.disabled=index===0;nav.append(back,next);s.append(opts,nav,el('p','micro','各题不一定连续。按第一反应选择，可以返回修改。'));
+  const nav=el('div','actions'),back=button('← 上一题',()=>{index--;question()},'btn secondary');back.id='back';back.disabled=index===0;nav.append(back,next);s.append(opts,nav,el('p','micro','各题不一定连续。按第一反应选，可以返回修改。'));
  }
  function section(parent,n,title){const s=el('section','section'),h=el('div','section-title');h.append(el('span','',n),el('h3','',title));s.append(h);parent.append(s);return s}
  function theme(node,t){for(const [key,value]of Object.entries(t))node.style.setProperty('--'+({accent:'gold',secondary:'green'}[key]||key),value)}
@@ -35,8 +35,8 @@
   const s=view(result.hidden?'result hidden-result':'result'),p=result.profile,r=FateReport.build(p.id,result.abilities);s.dataset.character=p.id;theme(s,r.theme);
   const head=el('div','result-head'),copy=el('div');copy.append(el('span','pill',result.hidden?'隐藏彩蛋 · 偶然相逢':result.tied?'本次并列匹配':result.close?'本次接近的角色之一':'本次选择，更像'),el('h2','',p.name),el('p','verdict',p.verdict),el('p','result-number',`${p.affiliation} / 原创同人解读`));head.append(copy,characterPortrait(p));s.append(head);
   if(!result.hidden&&result.close){const box=el('aside','near-match');box.append(el('strong','',result.tied?`你与${result.runner.name}的匹配也并列。`:`${result.runner.name}也与你很接近。`),el('p','note',result.tied?'你身上，也有另一位角色的影子。':`${result.runner.tag}`));s.append(box)}
-  if(result.hidden){const banner=el('aside','hidden-banner');banner.append(el('p','eyebrow','HIDDEN ENCOUNTER'),el('h3','','你遇见了一位没有写在名单上的人。'),el('p','note','本次独立彩蛋触发率为 0.1%，不是答题匹配出的稀有人格。你的常规匹配仍然保留。'));s.append(banner)}
-  const ability=section(s,'01','你的六维能力');const chart=el('div','ability-chart');chart.id='ability-chart';FateRadar.render(chart,result.abilities,r.theme);ability.append(chart,el('p','note','本次冒险的六维侧重，仅作娱乐叙事参考。'));
+  if(result.hidden){const banner=el('aside','hidden-banner');banner.append(el('p','eyebrow','HIDDEN ENCOUNTER'),el('h3','','你遇见了一位没写在名单上的人。'),el('p','note','这次相遇来自独立彩蛋，触发率 0.1%，不是靠答题匹配出的稀有人格。你的常规匹配仍然保留。'));s.append(banner)}
+  const ability=section(s,'01','你的六维能力');const chart=el('div','ability-chart');chart.id='ability-chart';FateRadar.render(chart,result.abilities,r.theme);ability.append(chart,el('p','note','六维只给这次的故事加一点侧重，图个好玩，不是心理测量。'));
   const readings=el('div','ability-readings');r.abilities.forEach(a=>{const item=el('article','ability-reading');item.dataset.band=a.band;item.append(el('h4','',`${a.name} · ${a.value}`),el('p','',a.text));readings.append(item)});ability.append(readings);
   if(result.hidden){const regular=el('p','note','本次常规角色：');regular.append(el('strong','regular-match',result.regularProfile.name));ability.append(regular)}
   const portrait=section(s,'02','与角色的相似之处');prose(portrait,r.similarity);
@@ -51,7 +51,18 @@
  // Text is confined to explicit card regions; even longer future copy is ellipsized.
  function wrap(ctx,text,x,y,width,line,maxLines){
   const rows=[];let row='';
-  for(const char of text){if(row&&ctx.measureText(row+char).width>width){rows.push(row);row=''}row+=char}if(row)rows.push(row);
+  for(const char of text){
+   if(row&&ctx.measureText(row+char).width>width){
+    // Keep closing punctuation with the preceding glyph, without exceeding the region.
+    let carry='';
+    if(/[，。！？、；：”’）》】」』％%]/u.test(char)||/[“‘（《【「『]$/u.test(row)){
+     const glyphs=Array.from(row);if(glyphs.length>1){carry=glyphs.pop();row=glyphs.join('')}
+    }
+    rows.push(row);row=carry;
+   }
+   row+=char;
+  }
+  if(row)rows.push(row);
   if(rows.length>maxLines){rows.length=maxLines;let last=rows[maxLines-1];while(last&&ctx.measureText(last+'…').width>width)last=last.slice(0,-1);rows[maxLines-1]=last+'…'}
   rows.forEach((row,i)=>ctx.fillText(row,x,y+i*line));return y+rows.length*line;
  }
@@ -70,11 +81,11 @@
    ctx.fillStyle=t.accent;ctx.font='22px sans-serif';ctx.fillText('你的六维能力',70,665);FateRadar.draw(ctx,result.abilities,450,925,160,t);
    ctx.fillStyle=t.accent;ctx.font='22px sans-serif';ctx.fillText(result.hidden?'这次特别的相逢':'你的鬼灭侧写',70,1225);ctx.fillStyle=t.text;ctx.font='24px sans-serif';wrap(ctx,p.similarity,70,1270,750,40,3);
    ctx.fillStyle=t.muted;ctx.font='19px sans-serif';if(result.hidden)wrap(ctx,`独立彩蛋 0.1% · 常规角色：${result.regularProfile.name}`,70,1440,750,27,2);else if(result.close)wrap(ctx,`${result.tied?'并列角色':'也很接近'}：${result.runner.name}`,70,1440,750,27,2);
-   ctx.font='18px sans-serif';ctx.fillText('鬼灭命运录 · 十六次选择，一张属于你的角色卡。',70,1500);ctx.fillText('非官方同人创作，与原作权利方无关联或授权关系。',70,1540);
+   ctx.font='18px sans-serif';ctx.fillText('鬼灭命运录 · 十六次选择，一张属于你的角色卡。',70,1500);ctx.fillText('非官方同人创作，与原作权利方无关联，也未获授权。',70,1540);
    const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('blob');exportUrl=URL.createObjectURL(blob);
    const dialog=el('dialog');theme(dialog,t);dialog.dataset.character=p.id;dialog.id='card-dialog';dialog.setAttribute('aria-labelledby','card-title');const title=el('h3','','把这次结果带走');title.id='card-title';const img=el('img');img.src=exportUrl;img.alt=`${p.name}角色匹配卡，原创解读`;
-   const a=el('a','btn','下载 PNG 角色卡');a.href=exportUrl;a.download=`鬼灭命运录-${p.name}.png`;dialog.append(title,el('p','note','点击下载；手机也可长按图片保存。'),img,a,button('关闭预览',()=>dialog.close(),'btn secondary'));document.body.append(dialog);dialog.showModal();status.textContent='角色卡已生成，可下载或长按保存。';
-  }catch{status.textContent='图片生成失败，请稍后重试。你也可以截图保存结果。'}
+   const a=el('a','btn','下载 PNG 角色卡');a.href=exportUrl;a.download=`鬼灭命运录-${p.name}.png`;dialog.append(title,el('p','note','点击下载；手机也可以长按图片保存。'),img,a,button('关闭预览',()=>dialog.close(),'btn secondary'));document.body.append(dialog);dialog.showModal();status.textContent='角色卡已生成，可以下载或长按保存。';
+  }catch{status.textContent='图片生成失败，请稍后再试。也可以直接截图。'}
  }
  home();
 })();

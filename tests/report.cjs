@@ -1,5 +1,8 @@
 const assert=require('node:assert/strict');
 const D=require('../js/data'),R=require('../js/report'),{score}=require('../js/scoring');
+// Copy edits must not alter confirmed question text, supports, ability inputs or hidden probability.
+const {createHash}=require('node:crypto');
+assert.equal(createHash('sha256').update(JSON.stringify({questions:D.questions,hidden:D.hidden,dimensions:D.dimensions})).digest('hex'),'65af0d54de862913cb631861c3a9376a3b36ad67dabdde265fcde7773c6d552a');
 const abilities=values=>values.map((value,i)=>({name:D.dimensions[i],value}));
 const luminance=hex=>{const rgb=hex.slice(1).match(/../g).map(x=>parseInt(x,16)/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return rgb[0]*.2126+rgb[1]*.7152+rgb[2]*.0722};
 const contrast=(a,b)=>(Math.max(luminance(a),luminance(b))+.05)/(Math.min(luminance(a),luminance(b))+.05);
